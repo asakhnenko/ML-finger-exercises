@@ -1,3 +1,6 @@
+import pandas as pd
+import numpy as np
+
 class ClassificationDecisionTree(object):
     """
     This class respresent subtrees in CART Decision Trees Algorithm
