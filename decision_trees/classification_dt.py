@@ -12,19 +12,20 @@ class ClassificationDecisionTree(object):
         self.left = None
         self.right = None
     
-    def train(self, features, targets, max_depth=2):
+    def train(self, features, targets, max_depth=2, current_depth=0):
         """
         Predict class of the point
         """
         self.purity_value = self.getPurity(targets)
+        self.current_depth = current_depth
         
         # Break if gini is perfect or max depth is reached
-        if self.purity_measure == 0. or max_depth == 0:
+        if self.purity_measure == 0. or max_depth == 0 or features.shape[0] < 2:
             self.label = str(ClassificationDecisionTree.dominatingClass(targets))
             return
     
         labels = features.columns.values
-        best_value = 0
+        best_value = -1
         # Go through all available features
         for label in labels:
             for value in features[label]:
@@ -57,11 +58,17 @@ class ClassificationDecisionTree(object):
         
         # Create left child
         self.left = ClassificationDecisionTree(self.purity_measure, self.num_classes)
-        self.left.train(features.loc[left_indices], targets.loc[left_indices], max_depth-1)
+        self.left.train(features.loc[left_indices], 
+                        targets.loc[left_indices], 
+                        max_depth - 1, 
+                        self.current_depth + 1)
         
         # Create right child
         self.right = ClassificationDecisionTree(self.purity_measure, self.num_classes)
-        self.right.train(features.loc[right_indices],targets.loc[right_indices], max_depth-1)
+        self.right.train(features.loc[right_indices],
+                         targets.loc[right_indices], 
+                         max_depth - 1,
+                         self.current_depth + 1)
     
     def predict(self, point):
         """
@@ -86,6 +93,7 @@ class ClassificationDecisionTree(object):
         if self.purity_measure == 'gini':
             return 1 - sum(weighted_votes ** 2)
         elif self.purity_measure == 'entropy':
+            # Adding 1e-8 for numeric stability
             return - sum(weighted_votes * np.log(weighted_votes + 1e-8))
 
     def dominatingClass(targets, num_classes=3):
