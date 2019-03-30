@@ -6,9 +6,10 @@ class ClassificationDecisionTree(object):
     This class respresent subtrees in CART Decision Trees Algorithm
     """
     
-    def __init__(self, purity_measure='gini', num_classes=2):
+    def __init__(self, parent=None, purity_measure='gini', num_classes=2):
         self.purity_measure = purity_measure
         self.num_classes = num_classes
+        self.parent = parent
         self.left = None
         self.right = None
     
@@ -57,14 +58,14 @@ class ClassificationDecisionTree(object):
         right_indices = features.loc[features[self.label] >= self.value].index
         
         # Create left child
-        self.left = ClassificationDecisionTree(self.purity_measure, self.num_classes)
+        self.left = ClassificationDecisionTree(self, self.purity_measure, self.num_classes)
         self.left.train(features.loc[left_indices], 
                         targets.loc[left_indices], 
                         max_depth - 1, 
                         self.current_depth + 1)
         
         # Create right child
-        self.right = ClassificationDecisionTree(self.purity_measure, self.num_classes)
+        self.right = ClassificationDecisionTree(self, self.purity_measure, self.num_classes)
         self.right.train(features.loc[right_indices],
                          targets.loc[right_indices], 
                          max_depth - 1,
