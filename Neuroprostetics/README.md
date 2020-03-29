@@ -1,1 +1,0 @@
-Python implementations of Neuroprostetics course homeworks
